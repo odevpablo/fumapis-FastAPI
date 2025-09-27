@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:383609@localhost:5432/fumapis")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:{password}@localhost:5432/fumapis")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
