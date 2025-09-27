@@ -437,7 +437,7 @@ def criar_cidadao(
 @router.get("/cidadaos/", response_model=List[Cidadao])
 def listar_cidadaos(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 2000,
     bairro: Optional[str] = None,
     status_cadastro: Optional[str] = None,
     db: Session = Depends(get_db)
@@ -454,22 +454,7 @@ def listar_cidadaos(
         status_cadastro=status_cadastro
     )
 
-@router.get("/cidadaos/contar")
-def contar_cidadaos(
-    bairro: Optional[str] = None,
-    status_cadastro: Optional[str] = None,
-    db: Session = Depends(get_db)
-):
-    """
-    Retorna a contagem total de cidadãos com filtros opcionais.
-    Acesso público - não requer autenticação.
-    """
-    total = crud_cidadao.count_cidadaos(
-        db=db,
-        bairro=bairro,
-        status_cadastro=status_cadastro
-    )
-    return {"total": total}
+
 
 @router.get("/cidadaos/{cidadao_id}", response_model=CidadaoInDB)
 def obter_cidadao(

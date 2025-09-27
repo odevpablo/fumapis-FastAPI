@@ -11,6 +11,7 @@ class Cidadao(Base):
     nome_conjuge = Column(String(100), nullable=True)
     cpf_conjuge = Column(String(11), nullable=True)
     bairro = Column(String(100), nullable=False)
+    zona = Column(String(50), nullable=True)
     telefone = Column(String(15), nullable=True)
     email = Column(String(100), nullable=True)
     endereco_completo = Column(String(200), nullable=False)

@@ -2,19 +2,41 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from .. import models
 from ..schemas.cidadao import CidadaoCreate, CidadaoUpdate
-from typing import List, Optional
+from typing import List, Optional, Any, Union, Dict
+
+def clean_null_values(cidadao: Any) -> None:
+    """
+    Converte strings 'NULL' para None em um objeto cidadão.
+    """
+    if cidadao is None:
+        return
+        
+    fields_to_clean = [
+        'cpf', 'cpf_conjuge', 'telefone', 'email', 
+        'nome_conjuge', 'programa_social'
+    ]
+    
+    for field in fields_to_clean:
+        if hasattr(cidadao, field):
+            value = getattr(cidadao, field)
+            if isinstance(value, str) and value.upper() == 'NULL':
+                setattr(cidadao, field, None)
 
 def get_cidadao(db: Session, cidadao_id: int):
     """
     Retorna um cidadão pelo ID.
     """
-    return db.query(models.Cidadao).filter(models.Cidadao.id == cidadao_id).first()
+    cidadao = db.query(models.Cidadao).filter(models.Cidadao.id == cidadao_id).first()
+    clean_null_values(cidadao)
+    return cidadao
 
 def get_cidadao_by_cpf(db: Session, cpf: str):
     """
     Retorna um cidadão pelo CPF.
     """
-    return db.query(models.Cidadao).filter(models.Cidadao.cpf == cpf).first()
+    cidadao = db.query(models.Cidadao).filter(models.Cidadao.cpf == cpf).first()
+    clean_null_values(cidadao)
+    return cidadao
 
 def get_cidadaos(
     db: Session, 
@@ -40,7 +62,11 @@ def get_cidadaos(
     if elegivel is not None:
         query = query.filter(models.Cidadao.elegivel == elegivel)
     
-    return query.offset(skip).limit(limit).all()
+    cidadaos = query.offset(skip).limit(limit).all()
+    # Limpar valores 'NULL' em cada cidadão retornado
+    for cidadao in cidadaos:
+        clean_null_values(cidadao)
+    return cidadaos
 
 # Função dedicada para buscar por elegibilidade
 
@@ -48,7 +74,13 @@ def get_cidadaos_por_elegibilidade(db: Session, elegivel: bool, skip: int = 0, l
     """
     Retorna uma lista de cidadãos filtrando por elegibilidade.
     """
-    return db.query(models.Cidadao).filter(models.Cidadao.elegivel == elegivel).offset(skip).limit(limit).all()
+    cidadaos = db.query(models.Cidadao).filter(
+        models.Cidadao.elegivel == elegivel
+    ).offset(skip).limit(limit).all()
+    # Limpar valores 'NULL' em cada cidadão retornado
+    for cidadao in cidadaos:
+        clean_null_values(cidadao)
+    return cidadaos
 
 def count_cidadaos(
     db: Session,
@@ -148,7 +180,7 @@ def search_cidadaos(db: Session, search_term: str, limit: int = 10):
     Busca cidadãos por nome, CPF, bairro ou endereço.
     """
     search = f"%{search_term}%"
-    return db.query(models.Cidadao).filter(
+    cidadaos = db.query(models.Cidadao).filter(
         or_(
             models.Cidadao.nome_completo.ilike(search),
             models.Cidadao.cpf.ilike(search),
@@ -156,3 +188,7 @@ def search_cidadaos(db: Session, search_term: str, limit: int = 10):
             models.Cidadao.endereco_completo.ilike(search)
         )
     ).limit(limit).all()
+    # Limpar valores 'NULL' em cada cidadão retornado
+    for cidadao in cidadaos:
+        clean_null_values(cidadao)
+    return cidadaos
