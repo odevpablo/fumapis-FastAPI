@@ -113,6 +113,7 @@ def create_cidadao(db: Session, cidadao: CidadaoCreate):
         nome_conjuge=cidadao.nome_conjuge,
         cpf_conjuge=cidadao.cpf_conjuge,
         bairro=cidadao.bairro,
+        zona=cidadao.zona,
         telefone=cidadao.telefone,
         email=cidadao.email,
         endereco_completo=cidadao.endereco_completo,
